@@ -34,6 +34,10 @@ Open `index.html` in a browser. That's it.
 3. Under **Build and deployment**, choose **Deploy from a branch**, select `main` and `/ (root)`, and save.
 4. The site will be published at `https://<username>.github.io/<repo-name>/`.
 
+## Privacy
+
+Your hand is saved only in your browser's `localStorage`. Nothing is sent anywhere: there are no cookies, analytics or third-party requests. The site is hosted on GitHub Pages, which logs visitors' IP addresses under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
 ## Credits
 
 *Lost Cities* is designed by Reiner Knizia and published by Kosmos / Thames & Kosmos. This is an unofficial fan-made tool and is not affiliated with or endorsed by the designer or publishers.
