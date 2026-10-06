@@ -135,8 +135,8 @@ main {
   color: var(--card-ink-light);
   font-size: .8rem;
 }
-.sixth[aria-pressed="true"] { border-color: var(--purple); }
-.sixth[aria-pressed="true"] .dot { background: var(--purple); border-style: solid; }
+.sixth[data-on="true"] { border-color: var(--purple); }
+.sixth[data-on="true"] .dot { background: var(--purple); border-style: solid; }
 .sixth:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
 .exp {
@@ -328,7 +328,7 @@ main {
 <header>
   <h1>Lost Cities</h1>
   <p>Tap the cards in front of you to tally your expeditions.</p>
-  <button class="sixth" id="sixth" type="button" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Add the purple Otherworld expedition</button>
+  <button class="sixth" id="sixth" type="button" data-on="false"><span class="dot" aria-hidden="true"></span><span class="label">Add the purple Otherworld expedition</span></button>
 </header>
 
 <main>
@@ -429,7 +429,9 @@ main {
     board.innerHTML = "";
     const list = visible();
     board.dataset.cols = list.length;
-    sixthBtn.setAttribute("aria-pressed", showSixth ? "true" : "false");
+    sixthBtn.dataset.on = showSixth ? "true" : "false";
+    sixthBtn.querySelector(".label").textContent =
+      (showSixth ? "Remove" : "Add") + " the purple Otherworld expedition";
     list.forEach(exp => {
       const col = document.createElement("section");
       col.className = "exp";
