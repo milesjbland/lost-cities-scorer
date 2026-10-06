@@ -47,3 +47,7 @@ Typefaces: [Alegreya](https://github.com/huertatipografica/Alegreya) by Huerta T
 ## License
 
 The code is released under the [MIT License](LICENSE). The fonts are under their own license, as above.
+
+## Support
+
+If you find this useful, you can [buy me a coffee](https://buymeacoffee.com/mairuzu).
