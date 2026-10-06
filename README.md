@@ -10,7 +10,7 @@ A small, single-page scoring helper for Reiner Knizia's card game *Lost Cities*.
 - Running total in a sticky bar, with a Clear button
 - The current hand and the sixth-expedition setting are saved in the browser (`localStorage`)
 - Light and dark themes follow the system setting
-- No build step, no dependencies: one HTML file (fonts load from Google Fonts)
+- No build step, no dependencies: one HTML file plus self-hosted fonts in `fonts/`, so no third-party requests
 
 ## Scoring rules
 
@@ -37,3 +37,9 @@ Open `index.html` in a browser. That's it.
 ## Credits
 
 *Lost Cities* is designed by Reiner Knizia and published by Kosmos / Thames & Kosmos. This is an unofficial fan-made tool and is not affiliated with or endorsed by the designer or publishers.
+
+Typefaces: [Alegreya](https://github.com/huertatipografica/Alegreya) by Huerta Tipográfica and IM Fell English / IM Fell English SC by Igino Marini, both under the SIL Open Font License 1.1 (see [`fonts/OFL.txt`](fonts/OFL.txt)).
+
+## License
+
+The code is released under the [MIT License](LICENSE). The fonts are under their own license, as above.
