@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lost Cities Scorer</title>
+<meta name="description" content="Tap the cards you've played to score a round of Lost Cities.">
+<meta name="theme-color" content="#2a2f3d">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Alegreya:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #e6d6b2;
+  --paper-deep: #d5c194;
+  --ink: #2b2116;
+  --ink-soft: #6b5638;
+  --rule: #a88c5c;
+  --bar: #2a2f3d;
+  --bar-ink: #f1e4c4;
+  --gold: #c99a3b;
+  --neg: #9c2d22;
+
+  --yellow: #d6a224;
+  --blue: #2f6aa3;
+  --white: #c8ced6;
+  --green: #4d8638;
+  --red: #b5372b;
+  --purple: #6d4a8f;
+  --card-ink-light: #fbf3df;
+  --card-ink-dark: #2b2116;
+
+  --serif-display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
+  --serif-body: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --num: "Alegreya", Georgia, "Times New Roman", serif;
+
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1d2230;
+    --paper-deep: #252b3b;
+    --ink: #efe2c2;
+    --ink-soft: #b3a27c;
+    --rule: #5a5340;
+    --bar: #121621;
+    --bar-ink: #f1e4c4;
+    --neg: #e0796b;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1d2230;
+  --paper-deep: #252b3b;
+  --ink: #efe2c2;
+  --ink-soft: #b3a27c;
+  --rule: #5a5340;
+  --bar: #121621;
+  --bar-ink: #f1e4c4;
+  --neg: #e0796b;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: inherit; }
+html, body { margin: 0; }
+body {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.18), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(0,0,0,.12), transparent 60%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--serif-body);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+header {
+  text-align: center;
+  padding: 1.25rem 1rem .5rem;
+}
+h1 {
+  font-family: var(--serif-display);
+  font-weight: 400;
+  font-size: clamp(2.1rem, 8vw, 3.4rem);
+  letter-spacing: .04em;
+  line-height: 1;
+  margin: 0;
+  color: var(--gold);
+  text-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+header p {
+  margin: .4rem auto 0;
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  max-width: 34ch;
+  line-height: 1.45;
+}
+
+main {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: .75rem clamp(.5rem, 2vw, 1.25rem) 8rem;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+  gap: clamp(.35rem, 1.6vw, .9rem);
+}
+.board[data-cols="6"] { --cols: 6; gap: clamp(.25rem, 1.2vw, .75rem); }
+.board[data-cols="6"] .card { font-size: clamp(.9rem, 3vw, 1.25rem); }
+
+.sixth {
+  appearance: none;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .8rem;
+  padding: .35rem .9rem .35rem .4rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  font-size: .98rem;
+  cursor: pointer;
+}
+.sixth .dot {
+  width: 1.3rem; height: 1.3rem;
+  border-radius: 50%;
+  border: 1.5px dashed var(--purple);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--card-ink-light);
+  font-size: .8rem;
+}
+.sixth[aria-pressed="true"] { border-color: var(--purple); }
+.sixth[aria-pressed="true"] .dot { background: var(--purple); border-style: solid; }
+.sixth:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.exp {
+  --c: var(--yellow);
+  --on: var(--card-ink-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.exp[data-exp="blue"]  { --c: var(--blue);  --on: var(--card-ink-light); }
+.exp[data-exp="white"] { --c: var(--white); --on: var(--card-ink-dark); }
+.exp[data-exp="green"] { --c: var(--green); --on: var(--card-ink-light); }
+.exp[data-exp="red"]   { --c: var(--red);   --on: var(--card-ink-light); }
+.exp[data-exp="purple"] { --c: var(--purple); --on: var(--card-ink-light); }
+
+.exp-head {
+  --hi: color-mix(in srgb, var(--c) 78%, #ffffff);
+  border-radius: 6px 6px 2px 2px;
+  background: #221c18;
+  color: var(--hi);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 55%, transparent), 0 2px 0 rgba(0,0,0,.2);
+  text-align: center;
+  margin-bottom: 4px;
+  padding: .5rem .15rem .35rem;
+}
+.exp[data-exp="white"] .exp-head { --hi: #eef1f4; }
+.exp-head svg {
+  display: block;
+  width: clamp(1.6rem, 6vw, 2.3rem);
+  height: auto;
+  margin: 0 auto .2rem;
+}
+.exp-head h2 {
+  font-family: var(--serif-display);
+  font-weight: 400;
+  font-size: clamp(.72rem, 2.4vw, 1rem);
+  margin: 0;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card {
+  appearance: none;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(32px, 6.4vw, 40px);
+  border-radius: 4px;
+  border: 1.5px dashed color-mix(in srgb, var(--c) 70%, var(--ink) 10%);
+  background: color-mix(in srgb, var(--c) 9%, transparent);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-family: var(--num);
+  font-weight: 700;
+  font-size: clamp(1rem, 3.4vw, 1.3rem);
+  font-variant-numeric: lining-nums tabular-nums;
+  padding: 0;
+  transition: transform .12s ease, background-color .12s ease, box-shadow .12s ease;
+  position: relative;
+}
+.card[aria-pressed="true"] {
+  border-style: solid;
+  border-color: rgba(0,0,0,.28);
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 2px, transparent 2px 6px),
+    var(--c);
+  color: var(--on);
+  box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.18);
+  transform: translateY(-1px);
+}
+.card:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.card:active { transform: translateY(1px); }
+
+.wager svg { width: 1.35em; height: 1.35em; }
+.wagers { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+
+.exp-score {
+  margin-top: 6px;
+  text-align: center;
+  border-top: 2px solid var(--c);
+  padding-top: .35rem;
+  min-height: 3.6rem;
+}
+.exp-score .pts {
+  font-family: var(--num);
+  font-weight: 800;
+  font-size: clamp(1.25rem, 4.4vw, 1.75rem);
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+.exp-score .pts.neg { color: var(--neg); }
+.exp-score .pts.idle { color: var(--ink-soft); opacity: .5; }
+.exp-score .sum {
+  font-family: var(--num);
+  font-size: clamp(.6rem, 2vw, .78rem);
+  color: var(--ink-soft);
+  margin-top: .25rem;
+  line-height: 1.3;
+  font-variant-numeric: lining-nums;
+}
+.bonus {
+  display: inline-block;
+  margin-top: .2rem;
+  font-style: italic;
+  font-size: clamp(.62rem, 2vw, .8rem);
+  color: var(--gold);
+}
+
+.tally {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: var(--bar);
+  color: var(--bar-ink);
+  padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -6px 20px rgba(0,0,0,.25);
+  border-top: 3px double var(--gold);
+}
+.tally-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.tally-label {
+  font-family: var(--serif-display);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+.tally-label small {
+  display: block;
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: .82rem;
+  opacity: .7;
+}
+.total {
+  font-family: var(--num);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 9vw, 2.9rem);
+  line-height: 1;
+  color: var(--gold);
+  margin-left: auto;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.total.neg { color: #e98a7c; }
+.total.bump { animation: bump .28s ease; }
+@keyframes bump { 50% { transform: scale(1.08); } }
+
+.reset {
+  appearance: none;
+  font: inherit;
+  font-family: var(--serif-display);
+  font-size: 1rem;
+  background: transparent;
+  color: var(--bar-ink);
+  border: 1.5px solid color-mix(in srgb, var(--bar-ink) 45%, transparent);
+  border-radius: 999px;
+  padding: .45rem .95rem;
+  cursor: pointer;
+}
+.reset:hover { border-color: var(--gold); color: var(--gold); }
+.reset:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.rules {
+  margin: 2rem auto 0;
+  max-width: 60ch;
+  font-size: .98rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  text-align: center;
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .total.bump { transition: none; animation: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Lost Cities</h1>
+  <p>Tap the cards in front of you to tally your expeditions.</p>
+  <button class="sixth" id="sixth" type="button" aria-pressed="false"><span class="dot" aria-hidden="true"></span>Add the purple Otherworld expedition</button>
+</header>
+
+<main>
+  <div class="board" id="board"></div>
+  <p class="rules">Each started expedition scores its cards minus 20, multiplied by one more than the number of wagers. Eight or more cards in an expedition earns a 20-point bonus.</p>
+</main>
+
+<div class="tally">
+  <div class="tally-inner">
+    <div class="tally-label">Total<small id="started">No expeditions started</small></div>
+    <div class="total" id="total" aria-live="polite">0</div>
+    <button class="reset" id="reset" type="button">Clear</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORE_KEY = "lost-cities-scorer-v2";
+
+  const ico = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const scenes = {
+    // Pyramid
+    yellow: ico(`<path d="M2.5 19 L12 5 L21.5 19 Z"/><path d="M12 5 L14.5 19"/>`),
+    // Twin tusks
+    white: ico(`<path d="M10 3.5 C4 7.5 4 16.5 10 20.5 C7.6 15.5 7.6 8.5 10 3.5 Z"/><path d="M14 3.5 C20 7.5 20 16.5 14 20.5 C16.4 15.5 16.4 8.5 14 3.5 Z"/>`),
+    // Leaping fish
+    blue: ico(`<path d="M3.5 13.5 C6 7.5 13 6 17 10.5 C13.5 14.5 7.5 16 3.5 13.5 Z"/><path d="M17 10.5 L21 7 L20 11.5 L21.5 15.5 Z"/><circle cx="7.3" cy="11.6" r=".6" fill="currentColor"/><path d="M10.5 9 C11.3 10.6 11.3 12.4 10.3 13.8"/>`),
+    // Stone head with helmet and ear spools
+    green: ico(`<path d="M6.5 9.5 C6.5 4.5 17.5 4.5 17.5 9.5 V16.5 C17.5 19.5 15 21 12 21 C9 21 6.5 19.5 6.5 16.5 Z"/><path d="M6.5 9.5 H17.5"/><path d="M10 5.6 V9.5 M14 5.6 V9.5"/><circle cx="4.6" cy="13.5" r="1.7"/><circle cx="19.4" cy="13.5" r="1.7"/><path d="M8.6 12.3 Q9.7 11.6 10.8 12.3 M13.2 12.3 Q14.3 11.6 15.4 12.3"/><path d="M11.3 13 L10.4 15.8 H13.6 L12.7 13"/><path d="M9.6 18.1 Q12 19.1 14.4 18.1"/>`),
+    // Volcano with plume
+    red: ico(`<path d="M2.5 20 L9 10 H15 L21.5 20 Z"/><path d="M9 10 L10.5 12 L12 10.8 L13.5 12 L15 10"/><path d="M12 8 C10.6 6.6 11.6 5 12.6 4.4 M9.8 7.6 L8.6 5.8 M14.2 7.6 L15.4 5.8"/>`),
+    // Alien glyph
+    purple: ico(`<path d="M12 21 V11"/><path d="M12 14 L7.5 9.5 V5.5"/><path d="M7.5 7.5 L5 6"/><path d="M12 11.5 L16.5 7 V3.5"/><path d="M16.5 7 L19.5 8"/>`)
+  };
+
+  const handshake = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M2 11 l4 -4 l4 2 l3 -2 l3 0 l6 5"/>
+    <path d="M2 11 l4 4"/>
+    <path d="M22 11 l-4 4"/>
+    <path d="M10 9 l-2 3 c-.6 .9 .6 2 1.5 1.3 L12 11 l5 4.5 c.6 .6 -.2 1.6 -.9 1.1"/>
+    <path d="M16.1 16.6 c.6 .6 -.2 1.6 -.9 1.1 l-1.5 -1.3"/>
+    <path d="M13.7 16.4 c.5 .6 -.2 1.5 -.9 1 l-1.2 -1"/>
+    <path d="M6 15 l2.5 2.2"/>
+  </svg>`;
+
+  const EXPS = [
+    { id: "yellow", name: "Desert" },
+    { id: "white",  name: "Mountain" },
+    { id: "blue",   name: "Sea" },
+    { id: "green",  name: "Rainforest" },
+    { id: "red",    name: "Volcano" },
+    { id: "purple", name: "Otherworld", sixth: true }
+  ];
+  let showSixth = false;
+  const visible = () => EXPS.filter(e => !e.sixth || showSixth);
+  const NUMBERS = [2,3,4,5,6,7,8,9,10];
+
+  function blank() {
+    const s = {};
+    EXPS.forEach(e => { s[e.id] = { wagers: [false,false,false], cards: [] }; });
+    return s;
+  }
+
+  let state = blank();
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (saved && saved.state) {
+      EXPS.forEach(e => { if (saved.state[e.id]) state[e.id] = saved.state[e.id]; });
+      showSixth = !!saved.showSixth;
+    }
+  } catch (e) { /* start fresh */ }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ state, showSixth })); } catch (e) {}
+  }
+
+  function scoreExp(id) {
+    const e = state[id];
+    const w = e.wagers.filter(Boolean).length;
+    const count = w + e.cards.length;
+    if (count === 0) return { started: false, total: 0 };
+    const sum = e.cards.reduce((a, b) => a + b, 0);
+    const mult = 1 + w;
+    const base = (sum - 20) * mult;
+    const bonus = count >= 8 ? 20 : 0;
+    return { started: true, sum, mult, base, bonus, total: base + bonus };
+  }
+
+  const board = document.getElementById("board");
+  const sixthBtn = document.getElementById("sixth");
+  sixthBtn.addEventListener("click", () => {
+    showSixth = !showSixth;
+    build();
+    update();
+  });
+
+  function build() {
+    board.innerHTML = "";
+    const list = visible();
+    board.dataset.cols = list.length;
+    sixthBtn.setAttribute("aria-pressed", showSixth ? "true" : "false");
+    list.forEach(exp => {
+      const col = document.createElement("section");
+      col.className = "exp";
+      col.dataset.exp = exp.id;
+      col.setAttribute("aria-label", exp.name + " expedition");
+
+      const head = document.createElement("div");
+      head.className = "exp-head";
+      head.innerHTML = scenes[exp.id] + `<h2>${exp.name}</h2>`;
+      col.appendChild(head);
+
+      const wagers = document.createElement("div");
+      wagers.className = "wagers";
+      for (let i = 0; i < 3; i++) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "card wager";
+        b.innerHTML = handshake;
+        b.setAttribute("aria-label", `${exp.name} wager card ${i + 1}`);
+        b.addEventListener("click", () => {
+          // Wagers are interchangeable: fill from the top, empty from the bottom
+          const w = state[exp.id].wagers;
+          const n = w.filter(Boolean).length;
+          const on = w[i];
+          const newCount = on ? n - 1 : n + 1;
+          state[exp.id].wagers = [0,1,2].map(k => k < newCount);
+          update();
+        });
+        wagers.appendChild(b);
+      }
+      col.appendChild(wagers);
+
+      NUMBERS.forEach(n => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "card num";
+        b.textContent = n;
+        b.dataset.n = n;
+        b.setAttribute("aria-label", `${exp.name} ${n}`);
+        b.addEventListener("click", () => {
+          const cards = state[exp.id].cards;
+          const idx = cards.indexOf(n);
+          if (idx >= 0) cards.splice(idx, 1); else cards.push(n);
+          cards.sort((a, b) => a - b);
+          update();
+        });
+        col.appendChild(b);
+      });
+
+      const sc = document.createElement("div");
+      sc.className = "exp-score";
+      sc.innerHTML = `<div class="pts"></div><div class="sum"></div>`;
+      col.appendChild(sc);
+
+      board.appendChild(col);
+    });
+  }
+
+  const totalEl = document.getElementById("total");
+  const startedEl = document.getElementById("started");
+  let lastTotal = null;
+
+  function update() {
+    let grand = 0, started = 0;
+    visible().forEach(exp => {
+      const col = board.querySelector(`[data-exp="${exp.id}"]`);
+      const e = state[exp.id];
+      col.querySelectorAll(".wager").forEach((b, i) => b.setAttribute("aria-pressed", e.wagers[i] ? "true" : "false"));
+      col.querySelectorAll(".num").forEach(b => b.setAttribute("aria-pressed", e.cards.includes(+b.dataset.n) ? "true" : "false"));
+
+      const r = scoreExp(exp.id);
+      const pts = col.querySelector(".pts");
+      const sum = col.querySelector(".sum");
+      if (!r.started) {
+        pts.textContent = "0";
+        pts.className = "pts idle";
+        sum.textContent = "Not started";
+      } else {
+        started++;
+        grand += r.total;
+        pts.textContent = r.total > 0 ? r.total : r.total < 0 ? "−" + Math.abs(r.total) : "0";
+        pts.className = "pts" + (r.total < 0 ? " neg" : "");
+        let f = `(${r.sum} − 20)`;
+        if (r.mult > 1) f += ` × ${r.mult}`;
+        if (r.bonus) f += ` + 20`;
+        sum.innerHTML = f + (r.bonus ? `<br><span class="bonus">8-card bonus</span>` : "");
+      }
+    });
+
+    totalEl.textContent = grand < 0 ? "−" + Math.abs(grand) : grand;
+    totalEl.classList.toggle("neg", grand < 0);
+    if (lastTotal !== null && lastTotal !== grand) {
+      totalEl.classList.remove("bump");
+      void totalEl.offsetWidth;
+      totalEl.classList.add("bump");
+    }
+    lastTotal = grand;
+    startedEl.textContent = started === 0 ? "No expeditions started"
+      : started === 1 ? "1 expedition started"
+      : `${started} expeditions started`;
+    save();
+  }
+
+  document.getElementById("reset").addEventListener("click", () => {
+    state = blank();
+    update();
+  });
+
+  build();
+  update();
+})();
+</script>
+</body>
+</html>
