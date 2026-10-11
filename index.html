@@ -488,11 +488,9 @@ main {
         b.innerHTML = handshake;
         b.setAttribute("aria-label", `${exp.name} wager card ${i + 1}`);
         b.addEventListener("click", () => {
-          // Wagers are interchangeable: fill from the top, empty from the bottom
-          const w = state[exp.id].wagers;
-          const n = w.filter(Boolean).length;
-          const on = w[i];
-          const newCount = on ? n - 1 : n + 1;
+          // Fill up to and including this wager; tapping the last lit one turns it off
+          const n = state[exp.id].wagers.filter(Boolean).length;
+          const newCount = i === n - 1 ? n - 1 : i + 1;
           state[exp.id].wagers = [0,1,2].map(k => k < newCount);
           update();
         });
